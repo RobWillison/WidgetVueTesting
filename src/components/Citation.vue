@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ImageThumbnail from './ImageThumbnail.vue'
+
 defineProps({
   citation: Object
 })
@@ -16,9 +18,7 @@ defineProps({
     </div>
     <span class="citation-readmore">Read more</span>
     <div class="citation-icons">
-      <button aria-label="WB">📷</button>
-      <button aria-label="Liver">📷</button>
-      <button aria-label="Mus Musculus (House Mouse)">📷</button>
+      <ImageThumbnail v-for="url in citation.image_urls" :url="url"/>
     </div>
     <div class="citation-tags">
       <span class="citation-tag">WB</span>

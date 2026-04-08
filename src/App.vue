@@ -2,6 +2,8 @@
 import Citationlist from './components/CitationList.vue'
 import ChartSection from './components/ChartSection.vue'
 import FilterButton from './components/FilterButton.vue'
+import ImageThumbnail from './components/ImageThumbnail.vue'
+import { store } from './store.js'
 </script>
 
 <template>
@@ -60,11 +62,7 @@ import FilterButton from './components/FilterButton.vue'
           Western blot analysis of extracts from HeLa cells transfected with 100 nM control siRNA #621 (C-) or p44 MAPK (Erk1) siRNA (+), using p44/42 MAPK (Erk1/2) Antibody #9102 and GCK Antibody #3732. The Erk1/2 antibody confirms silencing of Erk1 expression, and GCK Antibody is used to control for loading and specificity of p44 MAPK (Erk1) siRNA.
         </div>
         <div class="product-image-thumbs">
-          <button aria-label="Thumb 1">📷</button>
-          <button aria-label="Thumb 2">📷</button>
-          <button aria-label="Thumb 3">📷</button>
-          <button aria-label="Thumb 4">📷</button>
-          <button aria-label="Thumb 5">📷</button>
+          <ImageThumbnail v-for="url in store.all_image_urls" :url="url"/>
         </div>
       </section>
       <section class="right">
