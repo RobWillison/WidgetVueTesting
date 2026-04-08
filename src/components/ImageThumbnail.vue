@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { store } from '../store.js'
+
 defineProps({
   url: String
 })
 </script>
 
 <template>
-  <div class="thumbnail">
+  <div class="thumbnail" @click="store.image_popup_open = true">
     <img :src="url" />
   </div>
 </template>
