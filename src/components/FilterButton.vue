@@ -38,6 +38,7 @@
           <label><input type="checkbox" @change="store.setFilter({pubmed: $event.target.checked})"> PubMed</label>
           <label><input type="checkbox"> Preprints</label>
           <label><input type="checkbox" checked> Has images</label>
+          <label><input type="checkbox" @change="store.setFilter($event.target.checked ? {applications: [1]} : {applications: null})"> Toggle Western Blot (Test)</label>
         </div>
         <div class="dropdown-grid">
           <select><option>All reactants</option></select>

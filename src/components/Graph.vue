@@ -2,30 +2,52 @@
   import Graph from 'graphology';
   import Sigma from 'sigma';
   import forceAtlas2 from 'graphology-layout-forceatlas2';
-  import FA2Layout from 'graphology-layout-forceatlas2/worker';
-  import circlepack from 'graphology-layout/circlepack';  
-  import { onMounted } from 'vue';
+  import { onMounted, onBeforeUnmount, watch } from 'vue';
   import { store } from '../store.js'
   import { animateNodes } from "sigma/utils";
 
-  onMounted(() => {
+  const generateGraph = () => {
     const graph = new Graph();
 
     store.graphData.nodes.forEach(node => {
-      graph.addNode(node.id, { label: node.name, forceLabel: false, x: Math.random(), y: Math.random(), size: 10, color: "blue" });
+      graph.addNode(node.id, { label: node.code, forceLabel: false, x: Math.random(), y: Math.random(), size: 10, color: "blue" });
     });
 
     store.graphData.links.forEach(link => {
       graph.addEdge(link.source, link.target, { size: link.value / 1000, color: "grey" });
     });
+    return graph;
+  }
 
-    // let settings = forceAtlas2.inferSettings(graph);
-    // const fa2Layout = new FA2Layout(graph, {
-    //   settings: settings,
-    // });
+  let hoverState = {};
 
-    const renderer = new Sigma(graph, document.getElementById("container"));
+  const setupListeners = (renderer) => {
+    const setHoveredNode = (node) => {
+      if (node) {
+        hoverState.hoveredNode = node;
+        hoverState.hoveredNeighbors = new Set(renderer.graph.neighbors(node));
+      }
 
+      if (!node) {
+        hoverState.hoveredNode = undefined;
+        hoverState.hoveredNeighbors = undefined;
+      }
+
+      renderer.refresh({
+        skipIndexation: true,
+      });
+    }
+
+    renderer.on("enterNode", ({ node }) => {
+      setHoveredNode(node);
+    });
+
+    renderer.on("leaveNode", () => {
+      setHoveredNode(undefined);
+    });
+  }
+
+  const setupRendererSettings = (renderer) => {
     renderer.setSettings({
       enableCameraZooming: false,
       enableCameraPanning: false,
@@ -33,52 +55,13 @@
       labelRenderedSizeThreshold: 1000
     });
 
-    let state = {};
-    function setHoveredNode(node) {
-      if (node) {
-        state.hoveredNode = node;
-        state.hoveredNeighbors = new Set(graph.neighbors(node));
-      }
-
-      if (!node) {
-        state.hoveredNode = undefined;
-        state.hoveredNeighbors = undefined;
-      }
-
-      // Refresh rendering
-      renderer.refresh({
-        // We don't touch the graph data so we can skip its reindexation
-        skipIndexation: true,
-      });
-    }
-
-     renderer.on("enterNode", ({ node }) => {
-      setHoveredNode(node);
-    });
-    renderer.on("leaveNode", () => {
-      setHoveredNode(undefined);
-    });
-
-
     renderer.setSetting("nodeReducer", (node, data) => {
       const res = { ...data };
 
-      if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node) && state.hoveredNode !== node) {
+      if (hoverState.hoveredNeighbors && !hoverState.hoveredNeighbors.has(node) && hoverState.hoveredNode !== node) {
         res.label = "";
         res.color = "#f6f6f6";
       }
-
-      if (state.selectedNode === node) {
-        res.highlighted = true;
-      } else if (state.suggestions) {
-        if (state.suggestions.has(node)) {
-          res.forceLabel = true;
-        } else {
-          res.label = "";
-          res.color = "#f6f6f6";
-        }
-      }
-
       return res;
     });
 
@@ -86,33 +69,52 @@
       const res = { ...data };
 
       if (
-        state.hoveredNode &&
-        !graph.extremities(edge).every((n) => n === state.hoveredNode || graph.areNeighbors(n, state.hoveredNode))
+        hoverState.hoveredNode &&
+        !renderer.graph.extremities(edge).every((n) => n === hoverState.hoveredNode || renderer.graph.areNeighbors(n, hoverState.hoveredNode))
       ) {
         res.hidden = true;
       }
-
-      if (
-        state.suggestions &&
-        (!state.suggestions.has(graph.source(edge)) || !state.suggestions.has(graph.target(edge)))
-      ) {
-        res.hidden = true;
-      }
-
       return res;
     });
+  }
 
-    
-    //forceAtlas2(graph, {iterations: 50000});
+  const moveNodes = (renderer) => {
+    const positions = forceAtlas2(renderer.graph, {iterations: 1000});
 
-    // fa2Layout.start();
-    const positions = forceAtlas2(graph, {iterations: 1000});
-    //forceAtlas2.assign(graph, {iterations: 1000});
-    animateNodes(graph, positions, { duration: 2000 }, () => {
-      renderer.setSetting("labelRenderedSizeThreshold", 0);
+    animateNodes(renderer.graph, positions, { duration: 2000 }, () => {
+      renderer.setSetting("labelRenderedSizeThreshold", 0); // this is causing errors in console when firing after the tab is closed / if we re-render the graph before this has fired.
     });
+  }
+  let renderer;
 
+  const run = () => {
+    if (store.graphData == null) {
+      return;
+    }
+    const graph = generateGraph();
+    renderer = new Sigma(graph, document.getElementById("container"));
+    setupListeners(renderer);
+    setupRendererSettings(renderer);
+    moveNodes(renderer);
+  }
+
+  onMounted(() => {
+    run();
   });
+
+  // Watch for changes in graphData and re-render only when it changes
+  watch(() => [store.graphData], () => {
+    if (renderer) {
+      renderer.kill();
+    }
+    run();
+  });
+
+  onBeforeUnmount(() => {
+    if (renderer) {
+      renderer.kill();
+    }
+  })
 </script>
 
 <template>

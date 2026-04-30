@@ -7,7 +7,7 @@
   import Graph from './Graph.vue'
 
   // state
-  const activeTab = ref('map')
+  const activeTab = ref('graph')
 
   const setActiveTab = (tab: string) => {
     activeTab.value = tab
