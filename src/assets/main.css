@@ -116,6 +116,8 @@ header {
   min-width: 350px;
 }
 .right {
+  display: flex;
+  flex-direction: column;
   min-width: 350px;
 }
 
@@ -205,6 +207,7 @@ header {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex-grow: 1;
 }
 .charts-tabs {
   display: flex;

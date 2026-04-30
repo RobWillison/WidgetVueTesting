@@ -4,6 +4,7 @@
   import Common from './Common.vue'
   import Publication from './Publication.vue'
   import Methods from './Methods.vue'
+  import Graph from './Graph.vue'
 
   // state
   const activeTab = ref('map')
@@ -21,11 +22,13 @@
       <button :class="{ active: activeTab === 'common'}" @click="setActiveTab('common')">Commonly used with</button>
       <button :class="{ active: activeTab === 'publication'}" @click="setActiveTab('publication')">Publication</button>
       <button :class="{ active: activeTab === 'methods'}" @click="setActiveTab('methods')">Methods</button>
+      <button :class="{ active: activeTab === 'graph'}" @click="setActiveTab('graph')">Graph</button>
     </div>
 
     <Map v-if="activeTab === 'map'" />
     <Common v-if="activeTab === 'common'" />
     <Publication v-if="activeTab === 'publication'" />
     <Methods v-if="activeTab === 'methods'" />
+    <Graph v-if="activeTab === 'graph'" />
   </div>
 </template>

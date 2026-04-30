@@ -2,6 +2,31 @@
 
 # Endpoints
 
+
+### getFacets
+
+#### Request params
+
+```json
+  {
+    "filters": {
+      "reactants": [1, 5, 6],
+      "applications": [2, 3],
+      "reagentTypes": ["Antibody", "SmallMolecule"]
+    }
+  }
+```
+
+#### Example Response
+```json
+  {
+    "facets": {
+      "reactants": [{"name": "x", "id": 7}],
+    }
+  }
+```
+
+
 ### Citations
 
 #### Request params
@@ -42,13 +67,15 @@ Dilution
         "authors": ["Rob", "Joe"],
         "abstract": "Something about stuff",
         "reactants": ["Human"],
-        "applications": ["Wb"],
+        "applications": [{"WB": "Western Blotting", "IHC": "Immunohistochemistry"}],
         "figureIds": [123, 456, 789]
     }],
     "totalCitations": 150,
     "nextCursor": "yyy"
   }
 ```
+
+
 
 ### Images
 
@@ -132,9 +159,6 @@ Filters are the same as citations
 #### Example Response
 ```json
   {
-    "facets": {
-      "reactants": [{"name": "x", "id": 7}],
-    },
     "enabledFeatures": ["map", "imageCarousel", "citations"],
     "stylesheet": "url_here"
   }
